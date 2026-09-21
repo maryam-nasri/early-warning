@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -88,8 +87,8 @@
       <div class="row">
         <div class="field"><label for="res">Residence</label>
           <select id="res"><option>Dorm resident</option><option>Commuter</option></select></div>
-        <div class="field"><label for="hs">Adjustability to the city</label>
-          <select id="hs"><option>Public</option><option>Local Resistant</option><option>Close Distance</option><option>Distance more than 100m iles(US, Canada)</option><option>International</option></select></div>
+        <div class="field"><label for="hs">High school type</label>
+          <select id="hs"><option>Public</option><option>Private</option><option>Catholic</option><option>Boarding</option><option>Other</option></select></div>
       </div>
       <div class="row">
         <div class="field"><label for="math">First-semester math course</label>
@@ -139,7 +138,7 @@ const COEF = {
   math:{"Algebra":5,"Pre-calculus":10,"Calculus I":18,"Calculus II":22,"Linear Algebra/Differential Equations":25},
   phys:{"Introduction to Physics":5,"Physics I (Mechanics)":10,"Physics II (Electronics)":12,"Not registered":0},
   res:{"Dorm resident":8,"Commuter":3},
-  hs:{"Buffalo Local":6,"Nearby Cities":4,"More than 200 miles distance":3,"International Students:2},
+  hs:{"Boarding":6,"Private":5,"Catholic":5,"Public":4,"Other":3},
   gened:{"Quantitative / Natural Science":7,"Communication (Written & Oral)":6,"Critical Thinking & Info Literacy":5,"Social Sciences & DEI":4,"Humanities & Arts":3,"World Languages & Global/Historical":2},
   race:4, gender:3
 };
