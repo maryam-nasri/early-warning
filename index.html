@@ -53,6 +53,7 @@
   h2{font-family:var(--serif);font-weight:600;font-size:20px;margin:0}
   .empty{color:var(--muted);font-size:14px;padding:18px 0}
   .mini{font-size:12px;padding:6px 12px}
+  .report-link{display:inline-block;font-family:var(--sans);font-weight:500;font-size:12px;padding:6px 12px;border:1px solid var(--ink);border-radius:8px;background:var(--ink);color:#fff;text-decoration:none}
   .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:1px}
   @media(prefers-reduced-motion:reduce){.gauge-fill{transition:none}}
 </style>
@@ -63,7 +64,7 @@
     <div class="eyebrow">First-year engineering · persistence model</div>
     <h1>Student intake</h1>
     <p class="sub">Enter one student's survey responses. The persistence score updates live; add entries to the list, then open the report or export a CSV.</p>
-    <p><a href="report.html">Open analytical report</a></p>
+    <p><a href="report.html?v=20260921">Open analytical report</a></p>
   </header>
 
   <div class="grid">
@@ -128,7 +129,7 @@
     <div class="table-head">
       <h2>Entries <span id="count" style="font-family:var(--sans);font-size:14px;color:var(--muted);font-weight:400"></span></h2>
       <div>
-        <button type="button" class="mini" onclick="window.location.href='report.html'">Generate report</button>
+        <a class="report-link" href="./report.html?v=20260921">Generate report</a>
         <button type="button" class="ghost mini" onclick="clearAll()">Clear all</button>
         <button type="button" class="mini" onclick="downloadCSV()">Download CSV</button>
       </div>
