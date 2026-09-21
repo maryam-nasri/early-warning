@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Persistence Study Report</title>
+<style>
+  :root{--ink:#1f2a44;--paper:#f6f4ef;--line:#dcd7cc;--muted:#6b6457;--orange:#cc5b2e}
+  *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.5 system-ui,Arial,sans-serif}
+  .wrap{max-width:1120px;margin:auto;padding:28px 20px 60px}header{border-bottom:1px solid var(--line);padding-bottom:18px}
+  h1{font:600 clamp(28px,4vw,38px)/1.15 Georgia,serif;margin:6px 0}.eyebrow{text-transform:uppercase;letter-spacing:.14em;font-size:12px;color:var(--muted)}
+  .sub,.note{color:var(--muted)}a{color:#8e3a1e}button,.button{background:var(--ink);color:#fff;border:1px solid var(--ink);border-radius:7px;padding:10px 14px;font:inherit;cursor:pointer;text-decoration:none;display:inline-block}
+  button.secondary,.button.secondary{background:#fff;color:var(--ink)}button:disabled{opacity:.5;cursor:not-allowed}.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:22px 0}
+  .toolbar input[type=file]{max-width:240px}.status{font-size:13px;color:var(--muted)}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.card,.panel{background:#fff;border:1px solid var(--line);border-radius:11px;padding:20px}
+  .card strong{display:block;font-size:30px;margin:3px 0;color:var(--orange)}.card span{font-size:13px;color:var(--muted)}.charts{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0}
+  h2{font:600 22px Georgia,serif;margin:0 0 12px}.bar-row{display:grid;grid-template-columns:150px 1fr 45px;gap:10px;align-items:center;margin:10px 0;font-size:13px}.track{height:16px;background:#ece8e0;border-radius:9px;overflow:hidden}.fill{height:100%;background:var(--orange);border-radius:9px;min-width:0}
+  .empty{color:var(--muted);padding:22px 0}.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;white-space:nowrap;font-size:13px}th,td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left}th{background:#f8f7f4;position:sticky;top:0}.detail{margin-top:16px}.pill{border-radius:99px;padding:3px 8px;font-size:12px;font-weight:600;white-space:nowrap}
+  @media(max-width:760px){.cards,.charts{grid-template-columns:1fr}.bar-row{grid-template-columns:110px 1fr 35px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">First-year engineering · persistence model</div>
+    <h1>Student report</h1>
+    <p class="sub">Summary and charts calculated from student intake entries. <a href="index.html">Return to student intake</a>.</p>
+  </header>
+  <div class="toolbar">
+    <button id="download" type="button">Download Excel (.xlsx)</button>
+    <label class="button secondary" for="importFile">Import intake CSV</label><input id="importFile" type="file" accept=".csv,text/csv" hidden>
+    <button id="refresh" type="button" class="secondary">Refresh report</button>
+    <span id="status" class="status" role="status"></span>
+  </div>
+  <div class="cards">
+    <div class="card"><span>Students recorded</span><strong id="total">0</strong><span>Entries available in this browser</span></div>
+    <div class="card"><span>Average persistence score</span><strong id="average">—</strong><span>Out of 100</span></div>
+    <div class="card"><span>Scores below 55</span><strong id="support">0</strong><span>Students to review for support</span></div>
+  </div>
+  <div class="charts">
+    <section class="panel"><h2>Score distribution</h2><div id="bands"></div></section>
+    <section class="panel"><h2>Average score by math course</h2><div id="mathChart"></div></section>
+  </div>
+  <section class="panel detail">
+    <h2>Student entries</h2>
+    <p class="note">These scores are illustrative. They do not measure actual withdrawal or graduation rates. The supplied analytics page contained example numbers; this report uses only the rows entered or imported here.</p>
+    <div class="table-wrap"><table><thead id="tableHead"></thead><tbody id="tableBody"></tbody></table></div>
+  </section>
+  <p class="note">Entries are kept in this browser on this site. GitHub Pages does not provide a shared database. Export the Excel file for a durable copy; import a CSV if the intake and report were opened from different locations.</p>
+</div>
+<script>
+"use strict";
+const STORAGE_KEY="retention-study-intake-v2";
+const COLS=["Student ID","Age","Observed social behavior","Gender","Residence","Adjustability to the city","HS GPA","Math course","Physics 1st sem","English course","Gen-ed group","Persistence score","Tier"];
+const BANDS=[
+  {name:"High support need",min:0,max:39,color:"#b03636"},
+  {name:"At-risk",min:40,max:54,color:"#cc5b2e"},
+  {name:"Developing",min:55,max:69,color:"#c98a14"},
+  {name:"Strong",min:70,max:84,color:"#6aa03f"},
+  {name:"Very strong",min:85,max:100,color:"#4f8a3a"}
+];
+let entries=[];
+const $=id=>document.getElementById(id);
+function load(){
+  try{const data=JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]");entries=Array.isArray(data)?data.filter(validRow):[];}
+  catch(e){entries=[];$("status").textContent="Browser storage is unavailable. Import an intake CSV.";}
+  render();
+}
+function validRow(row){return Array.isArray(row)&&row.length===COLS.length&&/^\d{5}$/.test(String(row[0]))&&Number.isFinite(Number(row[11]))&&Number(row[11])>=0&&Number(row[11])<=100;}
+function cell(text,tag="td") {const el=document.createElement(tag);el.textContent=String(text??"");return el;}
+function barRow(label,value,max,color,suffix=""){
+  const row=document.createElement("div");row.className="bar-row";
+  const track=document.createElement("div");track.className="track";
+  const fill=document.createElement("div");fill.className="fill";fill.style.width=max?Math.max(0,Math.min(100,value/max*100))+"%":"0%";fill.style.background=color;
+  track.append(fill);row.append(cell(label,"span"),track,cell(String(value)+suffix,"span"));return row;
+}
+function render(){
+  const scores=entries.map(row=>Number(row[11]));
+  $("total").textContent=entries.length;
+  $("average").textContent=entries.length?(scores.reduce((a,b)=>a+b,0)/scores.length).toFixed(1):"—";
+  $("support").textContent=scores.filter(x=>x<55).length;
+  $("download").disabled=!entries.length;
+  const bands=$("bands");bands.replaceChildren();
+  if(!entries.length){bands.append(cell("No entries yet. Add a student on the intake page or import a CSV.","p"));}
+  else BANDS.forEach(b=>bands.append(barRow(b.name,scores.filter(x=>x>=b.min&&x<=b.max).length,entries.length,b.color)));
+  const math=$("mathChart");math.replaceChildren();
+  if(!entries.length){math.append(cell("No entries yet.","p"));}
+  else {
+    const groups=new Map();
+    entries.forEach(r=>{const key=String(r[7]);const g=groups.get(key)||{sum:0,n:0};g.sum+=Number(r[11]);g.n++;groups.set(key,g);});
+    [...groups].sort((a,b)=>a[0].localeCompare(b[0])).forEach(([name,g])=>math.append(barRow(name,Number((g.sum/g.n).toFixed(1)),100,"#1f2a44","")));
+  }
+  const head=$("tableHead"),body=$("tableBody");head.replaceChildren();body.replaceChildren();
+  const hr=document.createElement("tr");COLS.forEach(h=>hr.append(cell(h,"th")));head.append(hr);
+  entries.forEach(row=>{const tr=document.createElement("tr");row.forEach(value=>tr.append(cell(value)));body.append(tr);});
+  if(!entries.length){const tr=document.createElement("tr"),td=cell("No student entries.");td.colSpan=COLS.length;tr.append(td);body.append(tr);}
+  if(!$("status").textContent) $("status").textContent=entries.length+" student entries loaded";
+}
+function parseCSV(text){
+  const rows=[];let row=[],field="",quoted=false;
+  for(let i=0;i<text.length;i++){
+    const c=text[i];
+    if(quoted){if(c==='"'&&text[i+1]==='"'){field+='"';i++;}else if(c==='"')quoted=false;else field+=c;}
+    else if(c==='"')quoted=true;
+    else if(c===','){row.push(field);field="";}
+    else if(c==='\n'){row.push(field.replace(/\r$/,""));rows.push(row);row=[];field="";}
+    else field+=c;
+  }
+  if(quoted)throw Error("The CSV has an unclosed quote.");
+  if(field!==""||row.length){row.push(field.replace(/\r$/,""));rows.push(row);}
+  return rows;
+}
+async function importCSV(file){
+  try{
+    const rows=parseCSV((await file.text()).replace(/^\uFEFF/,""));
+    if(!rows.length||rows[0].length!==COLS.length||!COLS.every((h,i)=>rows[0][i]===h))throw Error("Use a CSV exported from the updated student intake page.");
+    const known=new Set(entries.map(r=>String(r[0])));let added=0,skipped=0;
+    for(const row of rows.slice(1)){
+      if(!validRow(row)||known.has(String(row[0]))){skipped++;continue;}
+      row[1]=Number(row[1]);row[6]=Number(row[6]);row[11]=Number(row[11]);entries.push(row);known.add(String(row[0]));added++;
+    }
+    try{localStorage.setItem(STORAGE_KEY,JSON.stringify(entries));}catch(e){$("status").textContent="Storage unavailable; download Excel before closing.";}
+    $("status").textContent=added+" imported; "+skipped+" skipped (invalid or duplicate).";render();
+  }catch(e){$("status").textContent=e.message;}
+}
+function xml(s){return String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&apos;");}
+function colName(n){let s="";for(n++;n;n=Math.floor((n-1)/26))s=String.fromCharCode(65+(n-1)%26)+s;return s;}
+function worksheet(rows){
+  const body=rows.map((row,ri)=>'<row r="'+(ri+1)+'">'+row.map((v,ci)=>{
+    const ref=colName(ci)+(ri+1);
+    return typeof v==="number"&&Number.isFinite(v)?'<c r="'+ref+'"><v>'+v+'</v></c>':'<c r="'+ref+'" t="inlineStr"><is><t xml:space="preserve">'+xml(v)+'</t></is></c>';
+  }).join("")+'</row>').join("");
+  return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>'+body+'</sheetData></worksheet>';
+}
+function workbookFiles(){
+  const score=entries.map(r=>Number(r[11]));
+  const summary=[
+    ["Persistence Study Report","Value"],
+    ["Students",entries.length],
+    ["Average persistence score",Number((score.reduce((a,b)=>a+b,0)/score.length).toFixed(1))],
+    ["Scores below 55",score.filter(x=>x<55).length],
+    [],["Score band","Students"],
+    ...BANDS.map(b=>[b.name,score.filter(x=>x>=b.min&&x<=b.max).length]),
+    [],["Method","Illustrative persistence score; validate with observed outcomes."]
+  ];
+  const studentRows=[COLS,...entries.map(r=>r.map((v,i)=>[1,6,11].includes(i)?Number(v):String(v)))];
+  return {
+    "[Content_Types].xml":'<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/worksheets/sheet2.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/></Types>',
+    "_rels/.rels":'<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>',
+    "xl/workbook.xml":'<?xml version="1.0" encoding="UTF-8"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="Summary" sheetId="1" r:id="rId1"/><sheet name="Students" sheetId="2" r:id="rId2"/></sheets></workbook>',
+    "xl/_rels/workbook.xml.rels":'<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet2.xml"/></Relationships>',
+    "xl/worksheets/sheet1.xml":worksheet(summary),
+    "xl/worksheets/sheet2.xml":worksheet(studentRows)
+  };
+}
+const encoder=new TextEncoder();
+const crcTable=(()=>{const t=[];for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xedb88320^(c>>>1):c>>>1;t[n]=c>>>0;}return t;})();
+function crc32(bytes){let c=0xffffffff;for(const b of bytes)c=crcTable[(c^b)&255]^(c>>>8);return(c^0xffffffff)>>>0;}
+function u16(n){return [n&255,(n>>>8)&255]}function u32(n){return [n&255,(n>>>8)&255,(n>>>16)&255,(n>>>24)&255]}
+function zip(files){
+  const chunks=[],central=[];let offset=0;
+  for(const [path,content] of Object.entries(files)){
+    const name=encoder.encode(path),data=encoder.encode(content),crc=crc32(data);
+    const local=new Uint8Array([...u32(0x04034b50),...u16(20),...u16(0),...u16(0),...u16(0),...u16(0),...u32(crc),...u32(data.length),...u32(data.length),...u16(name.length),...u16(0),...name]);
+    chunks.push(local,data);
+    central.push(new Uint8Array([...u32(0x02014b50),...u16(20),...u16(20),...u16(0),...u16(0),...u16(0),...u16(0),...u32(crc),...u32(data.length),...u32(data.length),...u16(name.length),...u16(0),...u16(0),...u16(0),...u16(0),...u32(0),...u32(offset),...name]));
+    offset+=local.length+data.length;
+  }
+  const centralSize=central.reduce((n,x)=>n+x.length,0);
+  const end=new Uint8Array([...u32(0x06054b50),...u16(0),...u16(0),...u16(central.length),...u16(central.length),...u32(centralSize),...u32(offset),...u16(0)]);
+  return new Blob([...chunks,...central,end],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+}
+function downloadExcel(){
+  if(!entries.length)return;
+  const url=URL.createObjectURL(zip(workbookFiles()));
+  const a=document.createElement("a");a.href=url;a.download="persistence_report_"+new Date().toISOString().slice(0,10)+".xlsx";document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);
+}
+$("download").addEventListener("click",downloadExcel);
+$("importFile").addEventListener("change",e=>{const file=e.target.files[0];if(file)importCSV(file);e.target.value="";});
+$("refresh").addEventListener("click",()=>{$("status").textContent="";load();});
+window.addEventListener("storage",e=>{if(e.key===STORAGE_KEY)load();});
+load();
+</script>
+</body>
+</html>
