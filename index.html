@@ -75,20 +75,20 @@
         </div>
       </div>
       <div class="row">
-        <div class="field"><label for="age">Age</label><input id="age" type="number" min="15" max="70" value="18"></div>
+        <div class="field"><label for="age">Age</label><input id="age" type="number" min="17" max="70" value="18"></div>
         <div class="field"><label for="gpa">Final high school GPA (0–4.0)</label><input id="gpa" type="number" min="0" max="4" step="0.01" value="3.50"></div>
       </div>
       <div class="row">
-        <div class="field"><label for="race">Race</label>
-          <select id="race"><option>White</option><option>Black or African American</option><option>Hispanic or Latino</option><option>Asian</option><option>American Indian or Alaska Native</option><option>Two or more races</option></select></div>
+        <div class="field"><label for="observation">Observed social behavior</label>
+          <select id="observation"><option>Not observed</option><option>Social</option><option>Shy</option></select></div>
         <div class="field"><label for="gender">Gender</label>
           <select id="gender"><option>Male</option><option>Female</option><option>Nonbinary or other</option></select></div>
       </div>
       <div class="row">
         <div class="field"><label for="res">Residence</label>
           <select id="res"><option>Dorm resident</option><option>Commuter</option></select></div>
-        <div class="field"><label for="hs">High school type</label>
-          <select id="hs"><option>Public</option><option>Private</option><option>Catholic</option><option>Boarding</option><option>Other</option></select></div>
+        <div class="field"><label for="location">Adjustability to the city</label>
+          <select id="location"><option>Local residence</option><option>Close distance</option><option>Distance above 100 miles</option><option>International</option></select></div>
       </div>
       <div class="row">
         <div class="field"><label for="math">First-semester math course</label>
@@ -96,6 +96,8 @@
         <div class="field"><label for="phys">First-semester physics</label>
           <select id="phys"><option>Introduction to Physics</option><option>Physics I (Mechanics)</option><option>Physics II (Electronics)</option><option>Not registered</option></select></div>
       </div>
+      <div class="field"><label for="eng">First-semester English course</label>
+        <select id="eng"><option>ESL / Developmental English</option><option selected>ENG 101</option><option>ENG 102</option></select></div>
       <div class="field"><label for="gened">Gen-ed group (curriculum taken alongside the engineering core)</label>
         <select id="gened">
           <option>Quantitative / Natural Science</option>
@@ -117,7 +119,7 @@
       <div id="pill" class="tier-pill" style="background:#eee;color:var(--muted)">Enter data</div>
       <div class="gauge"><div class="gauge-fill" id="gfill"></div></div>
       <div class="gauge-ticks"><span>0</span><span>40</span><span>55</span><span>70</span><span>85</span><span>100</span></div>
-      <p class="note">A lower score means more institutional support is warranted — not lower ability. Coefficients mirror the model workbook; race and gender start neutral until calibrated from real outcomes.</p>
+      <p class="note">A lower score suggests more institutional support may be warranted. This is an illustrative model; validate the coefficients against real outcomes before using it for decisions. Observed social behavior and gender are recorded but do not change the score.</p>
     </div>
   </div>
 
@@ -138,9 +140,9 @@ const COEF = {
   math:{"Algebra":5,"Pre-calculus":10,"Calculus I":18,"Calculus II":22,"Linear Algebra/Differential Equations":25},
   phys:{"Introduction to Physics":5,"Physics I (Mechanics)":10,"Physics II (Electronics)":12,"Not registered":0},
   res:{"Dorm resident":8,"Commuter":3},
-  hs:{"Boarding":6,"Private":5,"Catholic":5,"Public":4,"Other":3},
+  eng:{"ESL / Developmental English":2,"ENG 101":7,"ENG 102":10},
+  location:{"Local residence":6,"Close distance":5,"Distance above 100 miles":3,"International":1},
   gened:{"Quantitative / Natural Science":7,"Communication (Written & Oral)":6,"Critical Thinking & Info Literacy":5,"Social Sciences & DEI":4,"Humanities & Arts":3,"World Languages & Global/Historical":2},
-  race:4, gender:3
 };
 const BANDS=[
   {min:85,name:"Very strong",col:"#4f8a3a"},
@@ -149,44 +151,50 @@ const BANDS=[
   {min:40,name:"At-risk",col:"#cc5b2e"},
   {min:0, name:"High support need",col:"#b03636"}
 ];
-const COLS=["Student ID","Age","Race","Gender","Residence","High school type","HS GPA","Math course","Physics 1st sem","Gen-ed group","Persistence score","Tier"];
+const COLS=["Student ID","Age","Observed social behavior","Gender","Residence","Adjustability to the city","HS GPA","Math course","Physics 1st sem","English course","Gen-ed group","Persistence score","Tier"];
 let entries=[];
 const $=id=>document.getElementById(id);
 function ageBand(a){a=+a; if(a>=26)return 1; if(a>=23)return 2; if(a>=20)return 4; return 6;}
 function read(){
-  return {sid:$("sid").value.trim(),age:+$("age").value,race:$("race").value,gender:$("gender").value,
-    res:$("res").value,hs:$("hs").value,gpa:+$("gpa").value,math:$("math").value,phys:$("phys").value,gened:$("gened").value};
+  return {sid:$("sid").value.trim(),age:+$("age").value,observation:$("observation").value,gender:$("gender").value,
+    res:$("res").value,location:$("location").value,gpa:+$("gpa").value,math:$("math").value,phys:$("phys").value,eng:$("eng").value,gened:$("gened").value};
 }
 function compute(d){
   let s=(Math.min(Math.max(d.gpa,0),4)/4*32)+COEF.math[d.math]+COEF.phys[d.phys]
-    +COEF.res[d.res]+COEF.hs[d.hs]+ageBand(d.age)+COEF.gened[d.gened]+COEF.race+COEF.gender;
+    +COEF.eng[d.eng]+COEF.res[d.res]+COEF.location[d.location]+ageBand(d.age)+COEF.gened[d.gened];
   return Math.min(Math.round(s),100);
 }
 function tierFor(s){return BANDS.find(b=>s>=b.min);}
 function live(){
-  const d=read(); if(isNaN(d.gpa))return;
+  const d=read();
+  if(!Number.isFinite(d.gpa)||d.gpa<0||d.gpa>4||!Number.isFinite(d.age)||d.age<17||d.age>70){
+    $("snum").textContent="—"; $("gfill").style.width="0%";
+    $("pill").textContent="Enter valid GPA and age"; $("pill").style.background="#eee"; $("pill").style.color="var(--muted)";
+    return;
+  }
   const s=compute(d), t=tierFor(s);
   $("snum").textContent=s; $("gfill").style.width=s+"%"; $("gfill").style.background=t.col;
   const p=$("pill"); p.textContent=t.name; p.style.background=t.col; p.style.color="#fff";
 }
 function genId(){$("sid").value=String(Math.floor(10000+Math.random()*90000)); live();}
 function resetForm(){$("sid").value="";$("age").value=18;$("gpa").value="3.50";
-  ["race","gender","res","hs","math","phys","gened"].forEach(i=>$(i).selectedIndex=0);$("math").value="Calculus I";live();}
+  ["observation","gender","res","location","math","phys","eng","gened"].forEach(i=>$(i).selectedIndex=0);$("math").value="Calculus I";$("eng").value="ENG 101";live();}
 function addEntry(){
   const d=read();
   if(!/^\d{5}$/.test(d.sid)){alert("Enter a 5-digit Student ID (or use Generate).");return;}
   if(d.gpa<0||d.gpa>4||isNaN(d.gpa)){alert("GPA must be between 0 and 4.0.");return;}
+  if(d.age<17||d.age>70||!Number.isFinite(d.age)){alert("Age must be between 17 and 70.");return;}
   const s=compute(d), t=tierFor(s);
-  entries.push([d.sid,d.age,d.race,d.gender,d.res,d.hs,d.gpa.toFixed(2),d.math,d.phys,d.gened,s,t.name]);
+  entries.push([d.sid,d.age,d.observation,d.gender,d.res,d.location,d.gpa.toFixed(2),d.math,d.phys,d.eng,d.gened,s,t.name]);
   render(); genId();
 }
 function render(){
   $("count").textContent=entries.length?`· ${entries.length} student${entries.length>1?"s":""}`:"";
   if(!entries.length){$("tableWrap").innerHTML='<p class="empty">No entries yet. Fill the form and choose “Add to list.”</p>';return;}
-  let h='<table><thead><tr>'+["ID","Age","GPA","Math","Physics","Gen-ed","Score","Tier"].map(c=>`<th>${c}</th>`).join("")+'</tr></thead><tbody>';
-  entries.forEach(r=>{const c=tierFor(r[10]).col;
-    h+=`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[6]}</td><td>${r[7]}</td><td>${r[8]}</td><td>${r[9]}</td>`
-      +`<td><strong>${r[10]}</strong></td><td><span class="dot" style="background:${c}"></span>${r[11]}</td></tr>`;});
+  let h='<table><thead><tr>'+["ID","Age","GPA","Math","Physics","English","Gen-ed","Score","Tier"].map(c=>`<th>${c}</th>`).join("")+'</tr></thead><tbody>';
+  entries.forEach(r=>{const c=tierFor(r[11]).col;
+    h+=`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[6]}</td><td>${r[7]}</td><td>${r[8]}</td><td>${r[9]}</td><td>${r[10]}</td>`
+      +`<td><strong>${r[11]}</strong></td><td><span class="dot" style="background:${c}"></span>${r[12]}</td></tr>`;});
   h+='</tbody></table>'; $("tableWrap").innerHTML=h;
 }
 function clearAll(){if(entries.length&&confirm("Remove all entries? Export first if you need them.")){entries=[];render();}}
@@ -198,7 +206,7 @@ function downloadCSV(){
   const a=document.createElement("a"); a.href=url; a.download="student_intake_"+new Date().toISOString().slice(0,10)+".csv";
   document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
 }
-["sid","age","gpa","race","gender","res","hs","math","phys","gened"].forEach(i=>{
+["sid","age","gpa","observation","gender","res","location","math","phys","eng","gened"].forEach(i=>{
   $(i).addEventListener("input",live); $(i).addEventListener("change",live);});
 live();
 </script>
