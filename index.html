@@ -62,7 +62,8 @@
   <header>
     <div class="eyebrow">First-year engineering · persistence model</div>
     <h1>Student intake</h1>
-    <p class="sub">Enter one student's survey responses. The persistence score updates live; add entries to the list and export a CSV that drops straight into the model workbook.</p>
+    <p class="sub">Enter one student's survey responses. The persistence score updates live; add entries to the list, then open the report or export a CSV.</p>
+    <p><a href="report.html">Open analytical report</a></p>
   </header>
 
   <div class="grid">
@@ -132,6 +133,7 @@
       </div>
     </div>
     <div id="tableWrap"><p class="empty">No entries yet. Fill the form and choose “Add to list.”</p></div>
+    <p class="note" id="saveStatus">Entries are saved in this browser when storage is available. Export a file for a separate copy.</p>
   </div>
 </div>
 
@@ -152,8 +154,17 @@ const BANDS=[
   {min:0, name:"High support need",col:"#b03636"}
 ];
 const COLS=["Student ID","Age","Observed social behavior","Gender","Residence","Adjustability to the city","HS GPA","Math course","Physics 1st sem","English course","Gen-ed group","Persistence score","Tier"];
+const STORAGE_KEY="retention-study-intake-v2";
 let entries=[];
+try {
+  const saved=JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]");
+  if(Array.isArray(saved)) entries=saved.filter(row=>Array.isArray(row)&&row.length===COLS.length);
+} catch(e) { entries=[]; }
 const $=id=>document.getElementById(id);
+function saveEntries(){
+  try { localStorage.setItem(STORAGE_KEY,JSON.stringify(entries)); $("saveStatus").textContent="Saved in this browser. Open the report on the same site to analyze these entries."; }
+  catch(e) { $("saveStatus").textContent="Browser storage is unavailable. Download the CSV before closing this page, then import it in the report."; }
+}
 function ageBand(a){a=+a; if(a>=26)return 1; if(a>=23)return 2; if(a>=20)return 4; return 6;}
 function read(){
   return {sid:$("sid").value.trim(),age:+$("age").value,observation:$("observation").value,gender:$("gender").value,
@@ -186,7 +197,7 @@ function addEntry(){
   if(d.age<17||d.age>70||!Number.isFinite(d.age)){alert("Age must be between 17 and 70.");return;}
   const s=compute(d), t=tierFor(s);
   entries.push([d.sid,d.age,d.observation,d.gender,d.res,d.location,d.gpa.toFixed(2),d.math,d.phys,d.eng,d.gened,s,t.name]);
-  render(); genId();
+  saveEntries(); render(); genId();
 }
 function render(){
   $("count").textContent=entries.length?`· ${entries.length} student${entries.length>1?"s":""}`:"";
@@ -197,7 +208,7 @@ function render(){
       +`<td><strong>${r[11]}</strong></td><td><span class="dot" style="background:${c}"></span>${r[12]}</td></tr>`;});
   h+='</tbody></table>'; $("tableWrap").innerHTML=h;
 }
-function clearAll(){if(entries.length&&confirm("Remove all entries? Export first if you need them.")){entries=[];render();}}
+function clearAll(){if(entries.length&&confirm("Remove all entries? Export first if you need them.")){entries=[];saveEntries();render();}}
 function downloadCSV(){
   if(!entries.length){alert("No entries to export yet.");return;}
   const esc=v=>/[",\n]/.test(v)?'"'+String(v).replace(/"/g,'""')+'"':v;
@@ -209,6 +220,7 @@ function downloadCSV(){
 ["sid","age","gpa","observation","gender","res","location","math","phys","eng","gened"].forEach(i=>{
   $(i).addEventListener("input",live); $(i).addEventListener("change",live);});
 live();
+render();
 </script>
 </body>
 </html>
