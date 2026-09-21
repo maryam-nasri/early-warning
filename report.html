@@ -1,228 +1,226 @@
-
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Engineering Persistence — Student Intake</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Spectral:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Persistence Study Report</title>
+<title>Cohort analysis report</title>
 <style>
-  :root{
-    --ink:#1f2a44; --paper:#f6f4ef; --surface:#ffffff; --line:#dcd7cc;
-    --muted:#6b6457; --t-green:#4f8a3a; --t-green2:#6aa03f; --t-amber:#c98a14;
-    --t-orange:#cc5b2e; --t-red:#b03636;
-    --serif:"Spectral",Georgia,serif; --sans:"Inter",system-ui,-apple-system,sans-serif;
-  }
-  *{box-sizing:border-box}
-  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
-  .wrap{max-width:1040px;margin:0 auto;padding:32px 24px 80px}
-  header{border-bottom:1px solid var(--line);padding-bottom:20px;margin-bottom:28px}
-  .eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:500}
-  h1{font-family:var(--serif);font-weight:600;font-size:34px;line-height:1.1;margin:6px 0 4px}
-  .sub{color:var(--muted);font-size:14px;max-width:60ch}
-  .grid{display:grid;grid-template-columns:1fr 360px;gap:28px;align-items:start}
-  @media(max-width:840px){.grid{grid-template-columns:1fr}}
-  .card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:22px}
-  .field{margin-bottom:16px}
-  label{display:block;font-size:13px;font-weight:500;margin-bottom:6px}
-  input,select{width:100%;font-family:var(--sans);font-size:15px;color:var(--ink);padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:#fff}
-  input:focus,select:focus{outline:2px solid var(--ink);outline-offset:1px;border-color:var(--ink)}
-  .row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-  .id-row{display:flex;gap:8px}
-  .id-row input{flex:1}
-  button{font-family:var(--sans);font-weight:500;font-size:14px;cursor:pointer;border-radius:8px;border:1px solid var(--ink);background:var(--ink);color:#fff;padding:10px 16px}
-  button.ghost{background:#fff;color:var(--ink)}
-  button:hover{opacity:.9}
-  button:active{transform:translateY(1px)}
-  .score-card{position:sticky;top:24px}
-  .score-num{font-family:var(--serif);font-size:64px;font-weight:600;line-height:1}
-  .score-of{font-size:18px;color:var(--muted)}
-  .tier-pill{display:inline-block;font-size:13px;font-weight:600;padding:4px 12px;border-radius:20px;margin-top:6px}
-  .gauge{height:12px;border-radius:6px;background:#eee;margin:18px 0 6px;position:relative;overflow:hidden}
-  .gauge-fill{height:100%;border-radius:6px;width:0;transition:width .35s ease,background .35s ease}
-  .gauge-ticks{display:flex;justify-content:space-between;font-size:11px;color:var(--muted)}
-  .note{font-size:12px;color:var(--muted);margin-top:14px;line-height:1.45}
-  .actions{display:flex;gap:8px;margin-top:18px}
-  .actions button{flex:1}
-  table{width:100%;border-collapse:collapse;margin-top:14px;font-size:13px}
-  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}
-  th{font-weight:600;color:var(--muted);font-size:11px;letter-spacing:.04em;text-transform:uppercase}
-  .table-card{margin-top:28px}
-  .table-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
-  h2{font-family:var(--serif);font-weight:600;font-size:20px;margin:0}
-  .empty{color:var(--muted);font-size:14px;padding:18px 0}
-  .mini{font-size:12px;padding:6px 12px}
-  .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:1px}
-  @media(prefers-reduced-motion:reduce){.gauge-fill{transition:none}}
+  :root{--ink:#1f2a44;--paper:#f6f4ef;--line:#dcd7cc;--muted:#6b6457;--orange:#cc5b2e}
+  *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.5 system-ui,Arial,sans-serif}
+  .wrap{max-width:1120px;margin:auto;padding:28px 20px 60px}header{border-bottom:1px solid var(--line);padding-bottom:18px}
+  h1{font:600 clamp(28px,4vw,38px)/1.15 Georgia,serif;margin:6px 0}.eyebrow{text-transform:uppercase;letter-spacing:.14em;font-size:12px;color:var(--muted)}
+  .sub,.note{color:var(--muted)}a{color:#8e3a1e}button,.button{background:var(--ink);color:#fff;border:1px solid var(--ink);border-radius:7px;padding:10px 14px;font:inherit;cursor:pointer;text-decoration:none;display:inline-block}
+  button.secondary,.button.secondary{background:#fff;color:var(--ink)}button:disabled{opacity:.5;cursor:not-allowed}.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:22px 0}
+  .toolbar input[type=file]{max-width:240px}.status{font-size:13px;color:var(--muted)}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.card,.panel{background:#fff;border:1px solid var(--line);border-radius:11px;padding:20px}
+  .card strong{display:block;font-size:30px;margin:3px 0;color:var(--orange)}.card span{font-size:13px;color:var(--muted)}.charts{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0}
+  h2{font:600 22px Georgia,serif;margin:0 0 12px}.bar-row{display:grid;grid-template-columns:150px 1fr 45px;gap:10px;align-items:center;margin:10px 0;font-size:13px}.track{height:16px;background:#ece8e0;border-radius:9px;overflow:hidden}.fill{height:100%;background:var(--orange);border-radius:9px;min-width:0}
+  .empty{color:var(--muted);padding:22px 0}.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;white-space:nowrap;font-size:13px}th,td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left}th{background:#f8f7f4;position:sticky;top:0}.detail{margin-top:16px}.pill{border-radius:99px;padding:3px 8px;font-size:12px;font-weight:600;white-space:nowrap}
+  .filters{margin:16px 0}.filters h2{font:700 14px system-ui,Arial,sans-serif;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}.filter-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.filter-grid label{display:block;font-size:12px;font-weight:600}.filter-grid select{display:block;width:100%;margin-top:5px;padding:9px;border:1px solid var(--line);border-radius:7px;background:#fff;color:var(--ink)}.filter-meta{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-top:14px;color:var(--muted);font-size:13px}
+  @media print{.toolbar,.filter-meta button,.filter-grid,.back{display:none!important}.wrap{max-width:none}.card,.panel{break-inside:avoid}body{background:#fff}}
+  @media(max-width:760px){.cards,.charts,.filter-grid{grid-template-columns:1fr}.bar-row{grid-template-columns:110px 1fr 35px}}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
     <div class="eyebrow">First-year engineering · persistence model</div>
-    <h1>Student intake</h1>
-    <p class="sub">Enter one student's survey responses. The persistence score updates live; add entries to the list, then open the report or export a CSV.</p>
-    <p><a href="report.html">Open analytical report</a></p>
+    <h1>Cohort analysis report</h1>
+    <p class="sub">Summary and charts calculated from student intake entries. <a class="back" href="index.html">Back to intake</a>.</p>
   </header>
-
-  <div class="grid">
-    <div class="card">
-      <div class="field">
-        <label for="sid">Student ID (5-digit, no names)</label>
-        <div class="id-row">
-          <input id="sid" inputmode="numeric" maxlength="5" placeholder="e.g. 48217">
-          <button type="button" class="ghost" onclick="genId()">Generate</button>
-        </div>
-      </div>
-      <div class="row">
-        <div class="field"><label for="age">Age</label><input id="age" type="number" min="17" max="70" value="18"></div>
-        <div class="field"><label for="gpa">Final high school GPA (0–4.0)</label><input id="gpa" type="number" min="0" max="4" step="0.01" value="3.50"></div>
-      </div>
-      <div class="row">
-        <div class="field"><label for="observation">Observed social behavior</label>
-          <select id="observation"><option>Not observed</option><option>Social</option><option>Shy</option></select></div>
-        <div class="field"><label for="gender">Gender</label>
-          <select id="gender"><option>Male</option><option>Female</option><option>Nonbinary or other</option></select></div>
-      </div>
-      <div class="row">
-        <div class="field"><label for="res">Residence</label>
-          <select id="res"><option>Dorm resident</option><option>Commuter</option></select></div>
-        <div class="field"><label for="location">Adjustability to the city</label>
-          <select id="location"><option>Local residence</option><option>Close distance</option><option>Distance above 100 miles</option><option>International</option></select></div>
-      </div>
-      <div class="row">
-        <div class="field"><label for="math">First-semester math course</label>
-          <select id="math"><option>Algebra</option><option>Pre-calculus</option><option selected>Calculus I</option><option>Calculus II</option><option>Linear Algebra/Differential Equations</option></select></div>
-        <div class="field"><label for="phys">First-semester physics</label>
-          <select id="phys"><option>Introduction to Physics</option><option>Physics I (Mechanics)</option><option>Physics II (Electronics)</option><option>Not registered</option></select></div>
-      </div>
-      <div class="field"><label for="eng">First-semester English course</label>
-        <select id="eng"><option>ESL / Developmental English</option><option selected>ENG 101</option><option>ENG 102</option></select></div>
-      <div class="field"><label for="gened">Gen-ed group (curriculum taken alongside the engineering core)</label>
-        <select id="gened">
-          <option>Quantitative / Natural Science</option>
-          <option>Communication (Written & Oral)</option>
-          <option>Critical Thinking &amp; Info Literacy</option>
-          <option>Social Sciences &amp; DEI</option>
-          <option>Humanities &amp; Arts</option>
-          <option>World Languages &amp; Global/Historical</option>
-        </select></div>
-      <div class="actions">
-        <button type="button" onclick="addEntry()">Add to list</button>
-        <button type="button" class="ghost" onclick="resetForm()">Clear form</button>
-      </div>
-    </div>
-
-    <div class="card score-card">
-      <div style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:500">Persistence score</div>
-      <div><span class="score-num" id="snum">—</span><span class="score-of"> / 100</span></div>
-      <div id="pill" class="tier-pill" style="background:#eee;color:var(--muted)">Enter data</div>
-      <div class="gauge"><div class="gauge-fill" id="gfill"></div></div>
-      <div class="gauge-ticks"><span>0</span><span>40</span><span>55</span><span>70</span><span>85</span><span>100</span></div>
-      <p class="note">A lower score suggests more institutional support may be warranted. This is an illustrative model; validate the coefficients against real outcomes before using it for decisions. Observed social behavior and gender are recorded but do not change the score.</p>
-    </div>
+  <div class="toolbar">
+    <button id="download" type="button">Download Excel for current view (.xlsx)</button>
+    <label class="button secondary" for="importFile">Import intake CSV</label><input id="importFile" type="file" accept=".csv,text/csv" hidden>
+    <button id="refresh" type="button" class="secondary">Refresh report</button>
+    <button id="print" type="button" class="secondary">Print / Save as PDF</button>
+    <span id="status" class="status" role="status"></span>
   </div>
-
-  <div class="card table-card">
-    <div class="table-head">
-      <h2>Entries <span id="count" style="font-family:var(--sans);font-size:14px;color:var(--muted);font-weight:400"></span></h2>
-      <div>
-        <button type="button" class="mini" onclick="window.location.href='report.html'">Generate report</button>
-        <button type="button" class="ghost mini" onclick="clearAll()">Clear all</button>
-        <button type="button" class="mini" onclick="downloadCSV()">Download CSV</button>
-      </div>
-    </div>
-    <div id="tableWrap"><p class="empty">No entries yet. Fill the form and choose “Add to list.”</p></div>
-    <p class="note" id="saveStatus">Entries are saved in this browser when storage is available. Export a file for a separate copy.</p>
+  <section class="panel filters">
+    <h2>Filter the report — combine any variables</h2>
+    <div id="filterGrid" class="filter-grid"></div>
+    <div class="filter-meta"><span id="showing">Showing 0 students</span><button id="resetFilters" type="button" class="secondary">Reset filters</button></div>
+  </section>
+  <div class="cards">
+    <div class="card"><span>Students</span><strong id="total">0</strong><span>In the selected view</span></div>
+    <div class="card"><span>Mean score</span><strong id="average">—</strong><span>Out of 100</span></div>
+    <div class="card"><span>Median score</span><strong id="median">—</strong><span>Out of 100</span></div>
+    <div class="card"><span>Below developing</span><strong id="support">0</strong><span>Scores below 55</span></div>
   </div>
+  <div class="charts">
+    <section class="panel"><h2>Persistence tiers</h2><div id="bands"></div></section>
+    <section class="panel"><h2>Average score by factor</h2><label for="factor">Break down by</label> <select id="factor"></select><div id="mathChart"></div></section>
+  </div>
+  <section class="panel detail">
+    <h2>Student entries</h2>
+    <p class="note">These scores are illustrative. They do not measure actual withdrawal or graduation rates. The supplied analytics page contained example numbers; this report uses only the rows entered or imported here.</p>
+    <div class="table-wrap"><table><thead id="tableHead"></thead><tbody id="tableBody"></tbody></table></div>
+  </section>
+  <p class="note">Entries are kept in this browser on this site. GitHub Pages does not provide a shared database. Export the Excel file for a durable copy; import a CSV if the intake and report were opened from different locations.</p>
 </div>
-
 <script>
-const COEF = {
-  math:{"Algebra":5,"Pre-calculus":10,"Calculus I":18,"Calculus II":22,"Linear Algebra/Differential Equations":25},
-  phys:{"Introduction to Physics":5,"Physics I (Mechanics)":10,"Physics II (Electronics)":12,"Not registered":0},
-  res:{"Dorm resident":8,"Commuter":3},
-  eng:{"ESL / Developmental English":2,"ENG 101":7,"ENG 102":10},
-  location:{"Local residence":6,"Close distance":5,"Distance above 100 miles":3,"International":1},
-  gened:{"Quantitative / Natural Science":7,"Communication (Written & Oral)":6,"Critical Thinking & Info Literacy":5,"Social Sciences & DEI":4,"Humanities & Arts":3,"World Languages & Global/Historical":2},
-};
-const BANDS=[
-  {min:85,name:"Very strong",col:"#4f8a3a"},
-  {min:70,name:"Strong",col:"#6aa03f"},
-  {min:55,name:"Developing",col:"#c98a14"},
-  {min:40,name:"At-risk",col:"#cc5b2e"},
-  {min:0, name:"High support need",col:"#b03636"}
-];
-const COLS=["Student ID","Age","Observed social behavior","Gender","Residence","Adjustability to the city","HS GPA","Math course","Physics 1st sem","English course","Gen-ed group","Persistence score","Tier"];
+"use strict";
 const STORAGE_KEY="retention-study-intake-v2";
-let entries=[];
-try {
-  const saved=JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]");
-  if(Array.isArray(saved)) entries=saved.filter(row=>Array.isArray(row)&&row.length===COLS.length);
-} catch(e) { entries=[]; }
+const COLS=["Student ID","Age","Observed social behavior","Gender","Residence","Adjustability to the city","HS GPA","Math course","Physics 1st sem","English course","Gen-ed group","Persistence score","Tier"];
+const BANDS=[
+  {name:"High support need",min:0,max:39,color:"#b03636"},
+  {name:"At-risk",min:40,max:54,color:"#cc5b2e"},
+  {name:"Developing",min:55,max:69,color:"#c98a14"},
+  {name:"Strong",min:70,max:84,color:"#6aa03f"},
+  {name:"Very strong",min:85,max:100,color:"#4f8a3a"}
+];
+const FILTERS=[
+  [2,"Observed social behavior"],[3,"Gender"],[4,"Residence"],[5,"Adjustability to the city"],
+  [7,"Math course"],[8,"Physics"],[9,"English"],[10,"Gen-ed"],["age","Age band"]
+];
+let entries=[],view=[];
 const $=id=>document.getElementById(id);
-function saveEntries(){
-  try { localStorage.setItem(STORAGE_KEY,JSON.stringify(entries)); $("saveStatus").textContent="Saved in this browser. Open the report on the same site to analyze these entries."; }
-  catch(e) { $("saveStatus").textContent="Browser storage is unavailable. Download the CSV before closing this page, then import it in the report."; }
+function load(){
+  try{const data=JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]");entries=Array.isArray(data)?data.filter(validRow):[];}
+  catch(e){entries=[];$("status").textContent="Browser storage is unavailable. Import an intake CSV.";}
+  buildFilters();
+  render();
 }
-function ageBand(a){a=+a; if(a>=26)return 1; if(a>=23)return 2; if(a>=20)return 4; return 6;}
-function read(){
-  return {sid:$("sid").value.trim(),age:+$("age").value,observation:$("observation").value,gender:$("gender").value,
-    res:$("res").value,location:$("location").value,gpa:+$("gpa").value,math:$("math").value,phys:$("phys").value,eng:$("eng").value,gened:$("gened").value};
-}
-function compute(d){
-  let s=(Math.min(Math.max(d.gpa,0),4)/4*32)+COEF.math[d.math]+COEF.phys[d.phys]
-    +COEF.eng[d.eng]+COEF.res[d.res]+COEF.location[d.location]+ageBand(d.age)+COEF.gened[d.gened];
-  return Math.min(Math.round(s),100);
-}
-function tierFor(s){return BANDS.find(b=>s>=b.min);}
-function live(){
-  const d=read();
-  if(!Number.isFinite(d.gpa)||d.gpa<0||d.gpa>4||!Number.isFinite(d.age)||d.age<17||d.age>70){
-    $("snum").textContent="—"; $("gfill").style.width="0%";
-    $("pill").textContent="Enter valid GPA and age"; $("pill").style.background="#eee"; $("pill").style.color="var(--muted)";
-    return;
+function validRow(row){return Array.isArray(row)&&row.length===COLS.length&&/^\d{5}$/.test(String(row[0]))&&Number.isFinite(Number(row[11]))&&Number(row[11])>=0&&Number(row[11])<=100;}
+function ageBand(age){age=Number(age);return age>=26?"26+":age>=23?"23–25":age>=20?"20–22":"17–19";}
+function filterValue(row,key){return key==="age"?ageBand(row[1]):String(row[key]??"");}
+function buildFilters(){
+  const box=$("filterGrid");box.replaceChildren();
+  for(const [key,label] of FILTERS){
+    const holder=document.createElement("label");holder.textContent=label;
+    const select=document.createElement("select");select.dataset.key=String(key);
+    select.append(new Option("All",""));
+    [...new Set(entries.map(r=>filterValue(r,key)).filter(Boolean))].sort().forEach(v=>select.append(new Option(v,v)));
+    select.addEventListener("change",render);holder.append(select);box.append(holder);
   }
-  const s=compute(d), t=tierFor(s);
-  $("snum").textContent=s; $("gfill").style.width=s+"%"; $("gfill").style.background=t.col;
-  const p=$("pill"); p.textContent=t.name; p.style.background=t.col; p.style.color="#fff";
+  const factor=$("factor");factor.replaceChildren();
+  for(const [key,label] of FILTERS)factor.append(new Option(label,String(key)));
+  factor.value="7";
 }
-function genId(){$("sid").value=String(Math.floor(10000+Math.random()*90000)); live();}
-function resetForm(){$("sid").value="";$("age").value=18;$("gpa").value="3.50";
-  ["observation","gender","res","location","math","phys","eng","gened"].forEach(i=>$(i).selectedIndex=0);$("math").value="Calculus I";$("eng").value="ENG 101";live();}
-function addEntry(){
-  const d=read();
-  if(!/^\d{5}$/.test(d.sid)){alert("Enter a 5-digit Student ID (or use Generate).");return;}
-  if(d.gpa<0||d.gpa>4||isNaN(d.gpa)){alert("GPA must be between 0 and 4.0.");return;}
-  if(d.age<17||d.age>70||!Number.isFinite(d.age)){alert("Age must be between 17 and 70.");return;}
-  const s=compute(d), t=tierFor(s);
-  entries.push([d.sid,d.age,d.observation,d.gender,d.res,d.location,d.gpa.toFixed(2),d.math,d.phys,d.eng,d.gened,s,t.name]);
-  saveEntries(); render(); genId();
+function filtered(){
+  const controls=[...$("filterGrid").querySelectorAll("select")];
+  return entries.filter(r=>controls.every(s=>!s.value||filterValue(r,s.dataset.key)===s.value));
+}
+function cell(text,tag="td") {const el=document.createElement(tag);el.textContent=String(text??"");return el;}
+function barRow(label,value,max,color,suffix=""){
+  const row=document.createElement("div");row.className="bar-row";
+  const track=document.createElement("div");track.className="track";
+  const fill=document.createElement("div");fill.className="fill";fill.style.width=max?Math.max(0,Math.min(100,value/max*100))+"%":"0%";fill.style.background=color;
+  track.append(fill);row.append(cell(label,"span"),track,cell(String(value)+suffix,"span"));return row;
 }
 function render(){
-  $("count").textContent=entries.length?`· ${entries.length} student${entries.length>1?"s":""}`:"";
-  if(!entries.length){$("tableWrap").innerHTML='<p class="empty">No entries yet. Fill the form and choose “Add to list.”</p>';return;}
-  let h='<table><thead><tr>'+["ID","Age","GPA","Math","Physics","English","Gen-ed","Score","Tier"].map(c=>`<th>${c}</th>`).join("")+'</tr></thead><tbody>';
-  entries.forEach(r=>{const c=tierFor(r[11]).col;
-    h+=`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[6]}</td><td>${r[7]}</td><td>${r[8]}</td><td>${r[9]}</td><td>${r[10]}</td>`
-      +`<td><strong>${r[11]}</strong></td><td><span class="dot" style="background:${c}"></span>${r[12]}</td></tr>`;});
-  h+='</tbody></table>'; $("tableWrap").innerHTML=h;
+  view=filtered();
+  const scores=view.map(row=>Number(row[11]));
+  const sorted=[...scores].sort((a,b)=>a-b),n=sorted.length;
+  $("showing").textContent="Showing "+n+" of "+entries.length+" students";
+  $("total").textContent=n;
+  $("average").textContent=n?(scores.reduce((a,b)=>a+b,0)/n).toFixed(1):"—";
+  $("median").textContent=n?(n%2?sorted[(n-1)/2]:(sorted[n/2-1]+sorted[n/2])/2).toFixed(1):"—";
+  $("support").textContent=scores.filter(x=>x<55).length;
+  $("download").disabled=!n;
+  const bands=$("bands");bands.replaceChildren();
+  if(!n){bands.append(cell(entries.length?"No entries match these filters.":"No entries yet. Add a student on the intake page or import a CSV.","p"));}
+  else BANDS.forEach(b=>bands.append(barRow(b.name,scores.filter(x=>x>=b.min&&x<=b.max).length,n,b.color)));
+  const math=$("mathChart");math.replaceChildren();
+  if(!n){math.append(cell("No entries in this view.","p"));}
+  else {
+    const groups=new Map();
+    const factor=$("factor").value;
+    view.forEach(r=>{const key=filterValue(r,factor);const g=groups.get(key)||{sum:0,n:0};g.sum+=Number(r[11]);g.n++;groups.set(key,g);});
+    [...groups].sort((a,b)=>a[0].localeCompare(b[0])).forEach(([name,g])=>math.append(barRow(name,Number((g.sum/g.n).toFixed(1)),100,"#1f2a44","")));
+  }
+  const head=$("tableHead"),body=$("tableBody");head.replaceChildren();body.replaceChildren();
+  const hr=document.createElement("tr");COLS.forEach(h=>hr.append(cell(h,"th")));head.append(hr);
+  view.forEach(row=>{const tr=document.createElement("tr");row.forEach(value=>tr.append(cell(value)));body.append(tr);});
+  if(!n){const tr=document.createElement("tr"),td=cell("No student entries in this view.");td.colSpan=COLS.length;tr.append(td);body.append(tr);}
+  if(!$("status").textContent) $("status").textContent=entries.length+" student entries loaded";
 }
-function clearAll(){if(entries.length&&confirm("Remove all entries? Export first if you need them.")){entries=[];saveEntries();render();}}
-function downloadCSV(){
-  if(!entries.length){alert("No entries to export yet.");return;}
-  const esc=v=>/[",\n]/.test(v)?'"'+String(v).replace(/"/g,'""')+'"':v;
-  const csv=[COLS.join(",")].concat(entries.map(r=>r.map(esc).join(","))).join("\n");
-  const blob=new Blob([csv],{type:"text/csv"}), url=URL.createObjectURL(blob);
-  const a=document.createElement("a"); a.href=url; a.download="student_intake_"+new Date().toISOString().slice(0,10)+".csv";
-  document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+function parseCSV(text){
+  const rows=[];let row=[],field="",quoted=false;
+  for(let i=0;i<text.length;i++){
+    const c=text[i];
+    if(quoted){if(c==='"'&&text[i+1]==='"'){field+='"';i++;}else if(c==='"')quoted=false;else field+=c;}
+    else if(c==='"')quoted=true;
+    else if(c===','){row.push(field);field="";}
+    else if(c==='\n'){row.push(field.replace(/\r$/,""));rows.push(row);row=[];field="";}
+    else field+=c;
+  }
+  if(quoted)throw Error("The CSV has an unclosed quote.");
+  if(field!==""||row.length){row.push(field.replace(/\r$/,""));rows.push(row);}
+  return rows;
 }
-["sid","age","gpa","observation","gender","res","location","math","phys","eng","gened"].forEach(i=>{
-  $(i).addEventListener("input",live); $(i).addEventListener("change",live);});
-live();
-render();
+async function importCSV(file){
+  try{
+    const rows=parseCSV((await file.text()).replace(/^\uFEFF/,""));
+    if(!rows.length||rows[0].length!==COLS.length||!COLS.every((h,i)=>rows[0][i]===h))throw Error("Use a CSV exported from the updated student intake page.");
+    const known=new Set(entries.map(r=>String(r[0])));let added=0,skipped=0;
+    for(const row of rows.slice(1)){
+      if(!validRow(row)||known.has(String(row[0]))){skipped++;continue;}
+      row[1]=Number(row[1]);row[6]=Number(row[6]);row[11]=Number(row[11]);entries.push(row);known.add(String(row[0]));added++;
+    }
+    try{localStorage.setItem(STORAGE_KEY,JSON.stringify(entries));}catch(e){$("status").textContent="Storage unavailable; download Excel before closing.";}
+    $("status").textContent=added+" imported; "+skipped+" skipped (invalid or duplicate).";buildFilters();render();
+  }catch(e){$("status").textContent=e.message;}
+}
+function xml(s){return String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&apos;");}
+function colName(n){let s="";for(n++;n;n=Math.floor((n-1)/26))s=String.fromCharCode(65+(n-1)%26)+s;return s;}
+function worksheet(rows){
+  const body=rows.map((row,ri)=>'<row r="'+(ri+1)+'">'+row.map((v,ci)=>{
+    const ref=colName(ci)+(ri+1);
+    return typeof v==="number"&&Number.isFinite(v)?'<c r="'+ref+'"><v>'+v+'</v></c>':'<c r="'+ref+'" t="inlineStr"><is><t xml:space="preserve">'+xml(v)+'</t></is></c>';
+  }).join("")+'</row>').join("");
+  return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>'+body+'</sheetData></worksheet>';
+}
+function workbookFiles(){
+  const score=view.map(r=>Number(r[11]));
+  const summary=[
+    ["Persistence Study Report","Value"],
+    ["Students",view.length],
+    ["Average persistence score",Number((score.reduce((a,b)=>a+b,0)/score.length).toFixed(1))],
+    ["Scores below 55",score.filter(x=>x<55).length],
+    [],["Score band","Students"],
+    ...BANDS.map(b=>[b.name,score.filter(x=>x>=b.min&&x<=b.max).length]),
+    [],["Method","Illustrative persistence score; validate with observed outcomes."]
+  ];
+  const studentRows=[COLS,...view.map(r=>r.map((v,i)=>[1,6,11].includes(i)?Number(v):String(v)))];
+  return {
+    "[Content_Types].xml":'<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/worksheets/sheet2.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/></Types>',
+    "_rels/.rels":'<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>',
+    "xl/workbook.xml":'<?xml version="1.0" encoding="UTF-8"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="Summary" sheetId="1" r:id="rId1"/><sheet name="Students" sheetId="2" r:id="rId2"/></sheets></workbook>',
+    "xl/_rels/workbook.xml.rels":'<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet2.xml"/></Relationships>',
+    "xl/worksheets/sheet1.xml":worksheet(summary),
+    "xl/worksheets/sheet2.xml":worksheet(studentRows)
+  };
+}
+const encoder=new TextEncoder();
+const crcTable=(()=>{const t=[];for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xedb88320^(c>>>1):c>>>1;t[n]=c>>>0;}return t;})();
+function crc32(bytes){let c=0xffffffff;for(const b of bytes)c=crcTable[(c^b)&255]^(c>>>8);return(c^0xffffffff)>>>0;}
+function u16(n){return [n&255,(n>>>8)&255]}function u32(n){return [n&255,(n>>>8)&255,(n>>>16)&255,(n>>>24)&255]}
+function zip(files){
+  const chunks=[],central=[];let offset=0;
+  for(const [path,content] of Object.entries(files)){
+    const name=encoder.encode(path),data=encoder.encode(content),crc=crc32(data);
+    const local=new Uint8Array([...u32(0x04034b50),...u16(20),...u16(0),...u16(0),...u16(0),...u16(0),...u32(crc),...u32(data.length),...u32(data.length),...u16(name.length),...u16(0),...name]);
+    chunks.push(local,data);
+    central.push(new Uint8Array([...u32(0x02014b50),...u16(20),...u16(20),...u16(0),...u16(0),...u16(0),...u16(0),...u32(crc),...u32(data.length),...u32(data.length),...u16(name.length),...u16(0),...u16(0),...u16(0),...u16(0),...u32(0),...u32(offset),...name]));
+    offset+=local.length+data.length;
+  }
+  const centralSize=central.reduce((n,x)=>n+x.length,0);
+  const end=new Uint8Array([...u32(0x06054b50),...u16(0),...u16(0),...u16(central.length),...u16(central.length),...u32(centralSize),...u32(offset),...u16(0)]);
+  return new Blob([...chunks,...central,end],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+}
+function downloadExcel(){
+  if(!view.length)return;
+  const url=URL.createObjectURL(zip(workbookFiles()));
+  const a=document.createElement("a");a.href=url;a.download="persistence_report_"+new Date().toISOString().slice(0,10)+".xlsx";document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);
+}
+$("download").addEventListener("click",downloadExcel);
+$("importFile").addEventListener("change",e=>{const file=e.target.files[0];if(file)importCSV(file);e.target.value="";});
+$("refresh").addEventListener("click",()=>{$("status").textContent="";load();});
+$("resetFilters").addEventListener("click",()=>{$("filterGrid").querySelectorAll("select").forEach(s=>s.value="");render();});
+$("factor").addEventListener("change",render);
+$("print").addEventListener("click",()=>window.print());
+window.addEventListener("storage",e=>{if(e.key===STORAGE_KEY)load();});
+load();
 </script>
 </body>
 </html>
